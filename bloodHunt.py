@@ -2,18 +2,22 @@
 # By John LaRocco
 # Implemented for Jeju National University's Biomedical Ultrasound Lab (http://www.jejunu.ac.kr/eng/).
 
-# 8 March 2019
+# 1 April 2019
 # The purpose of this file is to run a Hessian filter over DICOM data to search for blood vessels.
 # It searches each file, slice by slice.
 # The slices are then integrated into a 3D matrix.
 # A binary 3D matrix, based on the presence of possible blood vessels, is also output.
-# In this matrix, 1 means that voxel has a blood vessel. 0 otherwise. 
+# TA similar search operation is performed for bone and hard tissue.
+# Both of these operations result in a binary matrix. 
+# In these matrices, 1 means that voxel has a blood vessel (or bone). 0 otherwise. 
 # The first voxel coordinate for a suspected blood vessel will be automatically selected as a 'target.'
-# Based on the 3D binary matrix, it will calculate a possible 'entry point' and angle, using a cost minimization algorithm.
+# Based on the 3D binary matrix, it can calculate a possible 'entry point' and angle, using a cost minimization algorithm.
 # Currently, the body of the function is hard coded based on values of sample no100's DICOM files. 
+# This function also exports the fused DICOM model and the blood and bone binary matrix as 3D .mat files (for MATLAB). 
+# In each MAT file is a 3D matrix called 'array,' which contains the information from Python. 
 
 
-
+from scipy import io
 import os
 import pydicom
 import numpy as np
@@ -248,9 +252,6 @@ def segmentAngle(costMap,target0,target1):
     return(finalAngle,finalC5ostMin)
 
 
-
-
-
 def maskedVesselSegmentation(array):
     image, binary = boneSegmentation(array, [1, 300])
     kernel = np.ones((4,4),np.float32)/16
@@ -272,7 +273,6 @@ def maskedVesselSegmentation(array):
     threshold=img.max()-img.mean()
     image = np.where((img > threshold), 255, 0)
     return(image)
-
 
 
 def trajectoryPlanner3D(costMap,target0,target1,target2):
@@ -345,8 +345,6 @@ def wheelCost(costMap,target0,target1):
     a=np.array([a1,a2,a3,a4,a5,a6,a7,a8])
     anglePos=np.where(a==a.min())
     return(anglePos,a)
-
-
 
 
 def maskFusion(img,mask):
@@ -433,8 +431,6 @@ def starPoint(anglePos1):
     return(dx,dy,cd)
 
 
-
-
 def endPointCalculator(anglePos,dimsize1,dimsize2,targetA,targetB):
     cord1=0
     cord2=0
@@ -477,18 +473,12 @@ def sphereCost(costMap,target0,target1,target2):
 # The cost map values in between the target and end point values will be converted to a high contrast value to allow for easier plotting.
 
 
-    #costMax=abs(costMap)
-    #costMax=costMap.max()
-    #costMap=costMap/costMax
     costMap=np.asarray(costMap)
-    #x1=np.squeeze(costMap[:,0,0])
+
     xsize=len(np.squeeze(costMap[:,0,0]))
-    #xsize=len(np.array(x1))
-    #y1=np.squeeze(costMap[0,:,0])
+
     ysize=len(np.squeeze(costMap[0,:,0]))
-    #ysize=len(np.array(y1))
-    #z1=np.squeeze(costMap[0,0,:])
-    #zsize=len(np.array(z1))
+
     zsize=len(np.squeeze(costMap[0,0,:]))
     costMap=costMap+1
     direct1=np.sum(costMap[0:target0,0:target1,0:target2])
@@ -614,6 +604,98 @@ def sphereCost(costMap,target0,target1,target2):
 
 
 
+def rawDicomMiner(file_name,filename,range1):
+# Function exports the DICOM values without any segmentation. 
+    nSlices=len(range1)-1
+    slicer = [pydicom.read_file(filename, force=True)]
+    image = DICOMtoNumpy(slicer)
+
+    imgsize=image.shape
+    imgsize=np.asarray(imgsize)
+    xBor=imgsize[1]
+    yBor=imgsize[2]
+    costMap=np.zeros([xBor,yBor,nSlices])
+
+    for i in range (0, nSlices):
+        filename=file_name+str(range1[i])+'.dcm'
+        slices = [pydicom.read_file(filename, force=True)]
+        image = DICOMtoNumpy(slices)
+
+        if i==0:
+            ind=0
+            newOrder=ind
+            costMap[:,:,newOrder]=np.squeeze(imageVeins)
+
+        if i >>1:
+            ind=i-1
+            newOrder=int(ind)
+            costMap[:,:,newOrder]=np.squeeze(imageVeins)
+
+        if i==nSlices:
+            ind=i-1
+            newOrder=int(ind)
+            costMap[:,:,newOrder]=np.squeeze(imageVeins)
+	return(costMap)
+
+
+
+
+def dicomMiner(file_name,filename,range1):
+# Function exports the DICOM values with any segmentation into tissue types: regular, bone, and soft (blood).
+    nSlices=len(range1)-1
+    slicer = [pydicom.read_file(filename, force=True)]
+    image = DICOMtoNumpy(slicer)
+
+    imgsize=image.shape
+    imgsize=np.asarray(imgsize)
+    xBor=imgsize[1]
+    yBor=imgsize[2]
+    costMap=np.zeros([xBor,yBor,nSlices])
+    boneMap=np.zeros([xBor,yBor,nSlices])
+    bloodMap=np.zeros([xBor,yBor,nSlices])
+	
+    for i in range (0, nSlices):
+        filename=file_name+str(range1[i])+'.dcm'
+        slices = [pydicom.read_file(filename, force=True)]
+        image = DICOMtoNumpy(slices)
+        
+        imageBone, binaryBone = boneSegmentation(image, [300, 3000])
+        imageBone = np.uint8(binaryBone)
+        imageBlood, binaryBlood = boneSegmentation(image, [1, 250])
+        imageBlood = np.uint8(binaryBlood)
+
+        if i==0:
+            ind=0
+            newOrder=ind
+            costMap[:,:,newOrder]=np.squeeze(image)
+            boneMap[:,:,newOrder]=np.squeeze(imageBone)
+            bloodMap[:,:,newOrder]=np.squeeze(imageBlood)
+
+        if i >>1:
+            ind=i-1
+            newOrder=int(ind)
+            costMap[:,:,newOrder]=np.squeeze(image)
+            boneMap[:,:,newOrder]=np.squeeze(imageBone)
+            bloodMap[:,:,newOrder]=np.squeeze(imageBlood)
+			
+        if i==nSlices:
+            ind=i-1
+            newOrder=int(ind)
+            costMap[:,:,newOrder]=np.squeeze(image)
+            boneMap[:,:,newOrder]=np.squeeze(imageBone)
+            bloodMap[:,:,newOrder]=np.squeeze(imageBlood)
+
+
+
+	return(costMap,boneMap,bloodMap)
+
+
+def np2Mat(array,fn):
+	data={'array':array}
+	nameOut=str(fn)+'.mat'
+	print(nameOut)
+	io.savemat(nameOut,data)
+
 
 def veinMiner(file_name,filename,range1):
     nSlices=len(range1)-1
@@ -626,10 +708,6 @@ def veinMiner(file_name,filename,range1):
     yBor=imgsize[2]
     costMap=np.zeros([xBor,yBor,nSlices])
 
-
-
-# The main body of the function.
-# iterative loop
     for i in range (0, nSlices):
 
         filename=file_name+str(range1[i])+'.dcm'
@@ -672,7 +750,7 @@ def veinMiner(file_name,filename,range1):
     return(costMap)
 
 # Main test
-target0=body of function
+target0=1
 if target0==0:
     target0=1
 target1=11
@@ -682,20 +760,18 @@ target2=3
 if target2==0:
     target2=1
 targets=np.array([target0,target1,target2])
-#trueNum=np.zeros(nSlices)
+
 lbnd=417
 ubnd=622
 
 file_name = 'I0000'
 range1=range(lbnd,ubnd)
 filename=file_name+str(range1[0])+'.dcm'
-costMap=veinMiner(file_name,filename,range1)
 
-bloodVessels = np.where(costMap == 1)
-targetPaintedX=bloodVessels[int(0)]
-targetPaintedY=bloodVessels[int(1)]
-targetPaintedZ=bloodVessels[int(2)]
-selecter=np.array([targetPaintedX[0],targetPaintedY[0],targetPaintedZ[0]])
+rawDicomMap=rawDicomMiner(file_name,filename,range1)
+np2Mat(rawDicomMap,'rawdicom')
 
-[costAp,x,y,z,entryCoord,maxVal,anglePos1,anglePos2]=sphereCost(costMap,selecter[0],selecter[1],selecter[2])
-print(costAp)
+dicomMap,boneMap,bloodMap=dicomMiner(file_name,filename,range1)
+np2Mat(dicomMap,'dicom')
+np2Mat(boneMap,'bone')
+np2Mat(bloodMap,'blood')
