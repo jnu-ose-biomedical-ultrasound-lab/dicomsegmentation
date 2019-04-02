@@ -624,17 +624,17 @@ def rawDicomMiner(file_name,filename,range1):
         if i==0:
             ind=0
             newOrder=ind
-            costMap[:,:,newOrder]=np.squeeze(imageVeins)
+            costMap[:,:,newOrder]=np.squeeze(image)
 
         if i >>1:
             ind=i-1
             newOrder=int(ind)
-            costMap[:,:,newOrder]=np.squeeze(imageVeins)
+            costMap[:,:,newOrder]=np.squeeze(image)
 
         if i==nSlices:
             ind=i-1
             newOrder=int(ind)
-            costMap[:,:,newOrder]=np.squeeze(imageVeins)
+            costMap[:,:,newOrder]=np.squeeze(image)
 	return(costMap)
 
 
