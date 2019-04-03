@@ -79,7 +79,7 @@ end
 xZLines=electrodePlace.xZLines;
 yZLines=electrodePlace.yZLines;
 fused=electrodePlace.fused;
-
+electrodePlace.bearing=[f,v];
 
 %% facing north
 if f==1 && v==1; % front is near higher indexes, and Y is longer axis
@@ -97,7 +97,7 @@ electrodePlace.f4=fused(4,:);
 
 electrodePlace.p3=fused(1,:);
 electrodePlace.p4=fused(2,:);
-
+electrodePlace.facing='north';
 end
 %% facing south
 if f==0 && v==1; % front is near lower indexes, and Y is longer axis
@@ -113,6 +113,7 @@ electrodePlace.f3=fused(2,:);
 electrodePlace.f4=fused(1,:);
 electrodePlace.p3=fused(4,:);
 electrodePlace.p4=fused(3,:);
+electrodePlace.facing='south';
 end
 
 %% facing west
@@ -129,6 +130,7 @@ electrodePlace.f3=fused(1,:);
 electrodePlace.f4=fused(3,:);
 electrodePlace.p3=fused(2,:);
 electrodePlace.p4=fused(4,:);
+electrodePlace.facing='west';
 end
 %% facing east
 if f==0 && v==0; % front is near lower indexes, and X is longer axis
@@ -144,5 +146,5 @@ electrodePlace.f3=fused(4,:);
 electrodePlace.f4=fused(2,:);
 electrodePlace.p3=fused(3,:);
 electrodePlace.p4=fused(1,:);
-
+electrodePlace.facing='east';
 end

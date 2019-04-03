@@ -67,8 +67,7 @@ top=1;
 else
 top=topVec(1);    
 end
-electrodePlace.vectors.cz=originVector;
-electrodePlace.startPoints.cz=top;
+electrodePlace.startPoints.cz=
 
 
 end
