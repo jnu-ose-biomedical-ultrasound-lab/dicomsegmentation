@@ -3,6 +3,13 @@ close all;
 clear;
 clc;
 
+% matlab dicom params: dinfo = dicominfo('TheFileName.dcm');
+%spacing = dinfo.PixelSpacing;
+%per_pixel_area = spacing(1) * spacing(2);
+%num_white_pixels = nnz(binarized_img);
+%total_white_area = num_white_pixels * per_pixel_area;
+
+
 %% load fused dicom model
 load('rawdicom.mat')
 dicom=array;
@@ -95,6 +102,13 @@ powerModel(electrodePlace.f3(1),electrodePlace.f3(2),electrodePlace.startPoints.
 powerModel(electrodePlace.f4(1),electrodePlace.f4(2),electrodePlace.startPoints.f4:(length(electrodePlace.power.f4)+electrodePlace.startPoints.f4-1))=electrodePlace.power.f4;
 powerModel(electrodePlace.p3(1),electrodePlace.p3(2),electrodePlace.startPoints.p3:(length(electrodePlace.power.p3)+electrodePlace.startPoints.p3-1))=electrodePlace.power.p3;
 powerModel(electrodePlace.p4(1),electrodePlace.p4(2),electrodePlace.startPoints.p4:(length(electrodePlace.power.p4)+electrodePlace.startPoints.p4-1))=electrodePlace.power.p4;
+
+if size(powerModel,3) > size(dicom,3),
+powerModel(:,:,size(dicom,3))=squeeze(sum(powerModel(:,:,size(dicom,3):size(powerModel,3)),3));
+powerModel=powerModel(:,:,1:size(dicom,3));
+end
+
+
 targetModel=powerModel;
 targetModel(powerModel>0)=1;
 
@@ -102,3 +116,8 @@ targetModel(powerModel>0)=1;
 save('electrodeInfo.mat','electrodePlace');
 save('powerModel.mat','powerModel');
 save('targetModel.mat','targetModel');
+
+%% 2d plot
+img=sum(targetModel,3);
+figure();
+imshow(img)
