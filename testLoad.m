@@ -77,5 +77,28 @@ a.Brain=0.6;
 [electrodePlace.power.p3]=powerDis(electrodePlace.vectors.p3,a,Imax,cmRes);
 [electrodePlace.power.p4]=powerDis(electrodePlace.vectors.p4,a,Imax,cmRes);
 
+
+%% initialize power model
 powerModel=zeros(size(dicom));
 
+
+powerModel(electrodePlace.cz(1),electrodePlace.cz(2),electrodePlace.startPoints.cz:(length(electrodePlace.power.cz)+electrodePlace.startPoints.cz-1))=electrodePlace.power.cz;
+powerModel(electrodePlace.c3(1),electrodePlace.c3(2),electrodePlace.startPoints.c3:(length(electrodePlace.power.c3)+electrodePlace.startPoints.c3-1))=electrodePlace.power.c3;
+powerModel(electrodePlace.c4(1),electrodePlace.c4(2),electrodePlace.startPoints.c4:(length(electrodePlace.power.c4)+electrodePlace.startPoints.c4-1))=electrodePlace.power.c4;
+powerModel(electrodePlace.t3(1),electrodePlace.t3(2),electrodePlace.startPoints.t3:(length(electrodePlace.power.t3)+electrodePlace.startPoints.t3-1))=electrodePlace.power.t3;
+powerModel(electrodePlace.t4(1),electrodePlace.t4(2),electrodePlace.startPoints.t4:(length(electrodePlace.power.t4)+electrodePlace.startPoints.t4-1))=electrodePlace.power.t4;
+powerModel(electrodePlace.oz(1),electrodePlace.oz(2),electrodePlace.startPoints.oz:(length(electrodePlace.power.oz)+electrodePlace.startPoints.oz-1))=electrodePlace.power.oz;
+powerModel(electrodePlace.pz(1),electrodePlace.pz(2),electrodePlace.startPoints.pz:(length(electrodePlace.power.pz)+electrodePlace.startPoints.pz-1))=electrodePlace.power.pz;
+powerModel(electrodePlace.fz(1),electrodePlace.fz(2),electrodePlace.startPoints.fz:(length(electrodePlace.power.fz)+electrodePlace.startPoints.fz-1))=electrodePlace.power.fz;
+powerModel(electrodePlace.fpz(1),electrodePlace.fpz(2),electrodePlace.startPoints.fpz:(length(electrodePlace.power.fpz)+electrodePlace.startPoints.fpz-1))=electrodePlace.power.fpz;
+powerModel(electrodePlace.f3(1),electrodePlace.f3(2),electrodePlace.startPoints.f3:(length(electrodePlace.power.f3)+electrodePlace.startPoints.f3-1))=electrodePlace.power.f3;
+powerModel(electrodePlace.f4(1),electrodePlace.f4(2),electrodePlace.startPoints.f4:(length(electrodePlace.power.f4)+electrodePlace.startPoints.f4-1))=electrodePlace.power.f4;
+powerModel(electrodePlace.p3(1),electrodePlace.p3(2),electrodePlace.startPoints.p3:(length(electrodePlace.power.p3)+electrodePlace.startPoints.p3-1))=electrodePlace.power.p3;
+powerModel(electrodePlace.p4(1),electrodePlace.p4(2),electrodePlace.startPoints.p4:(length(electrodePlace.power.p4)+electrodePlace.startPoints.p4-1))=electrodePlace.power.p4;
+targetModel=powerModel;
+targetModel(powerModel>0)=1;
+
+%% save and export
+save('electrodeInfo.mat','electrodePlace');
+save('powerModel.mat','powerModel');
+save('targetModel.mat','targetModel');
