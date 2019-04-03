@@ -49,17 +49,33 @@ electrodePlace.angles.p4=angleBetween(cz,electrodePlace.p4);
 
 %% load transducer specs
 
-freq=210000;
-period=0.5; % in seconds
+%freq=210000; % freq in hz
+%period=0.5; % in seconds
 voxelRes=0.001; % resolution in voxels, in meters
+cmRes=10*voxelRes; % resolution in MM
+Imax=3; % safety threshold in W/cm2 
+% based on freq at 1 MHz
+a.Blood=0.2;
+a.Bone=6.9;
+a.Brain=0.6;
 
-
-%% tissue hunting
-%% tissue thresholds: soft tissue (0-12), unclotted blood (13-50), clotted blood (50-75), all blood (13-75), bone (>300)
-
-
-
+%% calculate power spread
 % start with direct lines
 
+[electrodePlace.power.cz]=powerDis(electrodePlace.vectors.cz,a,Imax,cmRes);
+[electrodePlace.power.c3]=powerDis(electrodePlace.vectors.c3,a,Imax,cmRes);
+[electrodePlace.power.c4]=powerDis(electrodePlace.vectors.c4,a,Imax,cmRes);
+[electrodePlace.power.t3]=powerDis(electrodePlace.vectors.t3,a,Imax,cmRes);
+[electrodePlace.power.t4]=powerDis(electrodePlace.vectors.t4,a,Imax,cmRes);
+[electrodePlace.power.oz]=powerDis(electrodePlace.vectors.oz,a,Imax,cmRes);
+[electrodePlace.power.pz]=powerDis(electrodePlace.vectors.pz,a,Imax,cmRes);
+[electrodePlace.power.fz]=powerDis(electrodePlace.vectors.fz,a,Imax,cmRes);
+[electrodePlace.power.fpz]=powerDis(electrodePlace.vectors.fpz,a,Imax,cmRes);
 
+[electrodePlace.power.f3]=powerDis(electrodePlace.vectors.f3,a,Imax,cmRes);
+[electrodePlace.power.f4]=powerDis(electrodePlace.vectors.f4,a,Imax,cmRes);
+[electrodePlace.power.p3]=powerDis(electrodePlace.vectors.p3,a,Imax,cmRes);
+[electrodePlace.power.p4]=powerDis(electrodePlace.vectors.p4,a,Imax,cmRes);
+
+powerModel=zeros(size(dicom));
 
