@@ -5,5 +5,4 @@ Python:
 bloodHunt.py: This file takes DICOM files and seeks out blood vessels.
 
 MATLAB: 
-calculateParameters.m: Calculate basic spatial parameters for a fused, 3D matrix of imported DICOM files.
-positionElectrodes.m: Position 10-20 electrodes based on orientation of the head. 
+testLoad.m: The master script, currently hard coded for a particular file name. Able to load files, fit 10-20 electrodes to the fused solid, and then plot the results of stimulation power in 3D. 
