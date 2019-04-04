@@ -23,38 +23,48 @@ clc;
 
 
 %% alternative: load fused dicom model from python
+
+load('rawdicom.mat')
+dicom=array;
+
 %load('rawdicom.mat')
 %dicom=array;
+
+
 %% load dicom files using matlab
 lbnd=417;
 ubnd=622;
-i=1;
-file_name = 'I0000';
-range1=lbnd:1:ubnd;
-endstring=strcat(num2str(range1(i)),'.dcm');
-filename=strcat(file_name,endstring);
-dinfo = dicominfo(filename);
-spacing = dinfo.PixelSpacing;
-per_pixel_area = spacing(1) * spacing(2);
-X = dicomread(filename);
-firstFile=double(X);
+lbnd=0;
+ubnd=284;
 
-dicomArray=zeros(size(firstFile,1),size(firstFile,2),length(range1));
-dicomArray(:,:,i)=squeeze(firstFile);
-
-for i=2:(length(range1)-1);
-fileNo=range1(i);
-endstring=strcat(num2str(fileNo),'.dcm');
-filename=strcat(file_name,endstring);
-
-X = dicomread(filename);
-ff=double(X);
-
-dicomArray(:,:,i)=squeeze(ff);   
-    
-    
-end
-dicom=dicomArray;
+% i=1;
+% file_name = 'I0000';
+% file_name='image';
+% range1=lbnd:1:ubnd;
+% endstring=strcat(num2str(range1(i)),'.dcm');
+% filename=strcat(file_name,endstring);
+% dinfo = dicominfo(filename);
+% spacing = dinfo.PixelSpacing;
+% per_pixel_area = spacing(1) * spacing(2);
+% X = dicomread(filename);
+% firstFile=double(X);
+% 
+% dicomArray=zeros(size(firstFile,1),size(firstFile,2),length(range1));
+% dicomArray(:,:,i)=squeeze(firstFile);
+% 
+% for i=2:(length(range1)-1);
+% fileNo=range1(i);
+% endstring=strcat(num2str(fileNo),'.dcm');
+% filename=strcat(file_name,endstring);
+% 
+% X = dicomread(filename);
+% ff=double(X);
+% 
+% dicomArray(:,:,i)=squeeze(ff);   
+%     
+%     
+% end
+% dicom=dicomArray;
 %% set initial parameters
 electrodePlace=calculateParameters(dicom);
 electrodePlace=positionElectrodes(electrodePlace);
@@ -100,8 +110,8 @@ electrodePlace.angles.p4=angleBetween(cz,electrodePlace.p4);
 %freq=210000; % freq in hz
 %period=0.5; % in seconds
 
-%voxelRes=0.001; % resolution in voxels, in meters
-voxelRes=spacing; 
+voxelRes=0.001; % resolution in voxels, in meters
+%voxelRes=spacing; 
 cmRes=10*voxelRes; % resolution in MM
 Imax=3; % safety threshold in W/cm2 
 % based on freq at 1 MHz
@@ -154,7 +164,7 @@ end
 
 targetModel=powerModel;
 targetModel(powerModel>0)=1;
-dicomModel(dicom>0)=7;
+
 
 
 %% save and export

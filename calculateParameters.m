@@ -18,7 +18,10 @@ function electrodePlace=calculateParameters(dicom)
 %--------------------------------------------------------------------------
 
 %% Edge detection 
-img=sum(dicom,3);
+dicom2=zeros(size(dicom));
+dicom2(dicom>300)=700;
+
+img=sum(dicom2,3);
 X=squeeze(sum(img));
 Y=squeeze(sum(img'));
 
@@ -32,9 +35,20 @@ xwidth=abs(xu-xl)+1;
 yl=min(ynonzero);
 yu=max(ynonzero);
 ywidth=abs(yu-yl)+1;
-%ywidth=length(ynonzero);
+
+
+Xmax=max(X);
+Xm=find(X==Xmax);
+Xm=Xm(1);
 midx=ceil(.5*xwidth);
+midx=ceil(.5*(midx+Xm));
+
+Ymax=max(Y);
+Ym=find(Y==Ymax);
+Ym=Ym(1);
 midy=ceil(.5*ywidth);
+midy=ceil(.5*(midy+Ym));
+
 cz=[midx,midy];
 electrodePlace=[];
 % note: This assumes the midpoint of all non-zero values is CZ. 

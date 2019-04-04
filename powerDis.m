@@ -27,19 +27,23 @@ for i=1:length(powerVec);
 %Power=P times e^- (x*alpha)
 
 %% tissue thresholds: soft tissue (0-12), unclotted blood (13-50), clotted blood (50-75), all blood (13-75), other tissue (75-299), bone (>300)
-if vector(i) <= 0 && vector(i) < 13,
+%vector(i)=round(vector(i));
+
+R=round(vector(i));
+
+if R <= 0 && R < 13,
 a0=a.Brain;    
 end
 
-if vector(i) <= 13 && vector(i) < 76,
+if R <= 13 && R < 76,
 a0=a.Blood;    
 end
 
-if vector(i) <= 76 && vector(i) < 300,
+if R <= 76 && R < 300,
 a0=a.Brain;    
 end
 
-if vector(i) <= 300,
+if R >= 300,
 a0=a.Bone;    
 end
 
