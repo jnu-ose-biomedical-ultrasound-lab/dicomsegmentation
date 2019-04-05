@@ -32,10 +32,10 @@ dicom=array;
 
 
 %% load dicom files using matlab
-lbnd=417;
-ubnd=622;
-lbnd=0;
-ubnd=284;
+% lbnd=417;
+% ubnd=622;
+% lbnd=0;
+% ubnd=284;
 
 % i=1;
 % file_name = 'I0000';
@@ -141,7 +141,7 @@ a.Brain=0.6;
 %% initialize power model
 powerModel=zeros(size(dicom));
 
-dicomModel=dicom;
+
 powerModel(electrodePlace.cz(1),electrodePlace.cz(2),electrodePlace.startPoints.cz:(length(electrodePlace.power.cz)+electrodePlace.startPoints.cz-1))=(electrodePlace.power.cz);
 powerModel(electrodePlace.c3(1),electrodePlace.c3(2),electrodePlace.startPoints.c3:(length(electrodePlace.power.c3)+electrodePlace.startPoints.c3-1))=(electrodePlace.power.c3);
 powerModel(electrodePlace.c4(1),electrodePlace.c4(2),electrodePlace.startPoints.c4:(length(electrodePlace.power.c4)+electrodePlace.startPoints.c4-1))=(electrodePlace.power.c4);
