@@ -47,6 +47,9 @@ from mpl_toolkits.mplot3d import Axes3D
 from math import atan
 import cv2
 
+
+
+
 def load_patient(src_dir):
     slices = [pydicom.read_file(src_dir + '/' + s, force=True) for s in os.listdir(src_dir)]
 #    slices.sort(key=lambda x: int(x.InstanceNumber))
@@ -618,6 +621,7 @@ def rawDicomMiner(file_name,filename,range1):
 
     for i in range (0, nSlices):
         filename=file_name+str(range1[i])+'.dcm'
+      #  filename=file_name+str(range1[i])
         slices = [pydicom.read_file(filename, force=True)]
         image = DICOMtoNumpy(slices)
 
@@ -636,6 +640,98 @@ def rawDicomMiner(file_name,filename,range1):
             newOrder=int(ind)
             costMap[:,:,newOrder]=np.squeeze(image)
 	return(costMap)
+
+
+def rawDicomLister(resultList):
+# Function exports the DICOM values without any segmentation. 
+    nSlices=len(resultList)-1
+    slicer = [pydicom.read_file(resultList[0], force=True)]
+    image = DICOMtoNumpy(slicer)
+
+    imgsize=image.shape
+    imgsize=np.asarray(imgsize)
+    xBor=imgsize[1]
+    yBor=imgsize[2]
+    costMap=np.zeros([xBor,yBor,nSlices])
+
+    for i in range (0, nSlices):
+        #filename=file_name+str(range1[i])+'.dcm'
+      #  filename=file_name+str(range1[i])
+        filename=resultList[i]
+        slices = [pydicom.read_file(filename, force=True)]
+        image = DICOMtoNumpy(slices)
+
+        if i==0:
+            ind=0
+            newOrder=ind
+            costMap[:,:,newOrder]=np.squeeze(image)
+
+        if i >>1:
+            ind=i-1
+            newOrder=int(ind)
+            costMap[:,:,newOrder]=np.squeeze(image)
+
+        if i==nSlices:
+            ind=i-1
+            newOrder=int(ind)
+            costMap[:,:,newOrder]=np.squeeze(image)
+	return(costMap)
+
+
+
+
+def superDicomMiner(resultList):
+# Function exports the DICOM values with any segmentation into tissue types: regular, bone, and soft (blood).
+    nSlices=len(resultList)-1
+    slicer = [pydicom.read_file(resultList[0], force=True)]
+    image = DICOMtoNumpy(slicer)
+
+    imgsize=image.shape
+    imgsize=np.asarray(imgsize)
+    xBor=imgsize[1]
+    yBor=imgsize[2]
+    costMap=np.zeros([xBor,yBor,nSlices])
+    boneMap=np.zeros([xBor,yBor,nSlices])
+    bloodMap=np.zeros([xBor,yBor,nSlices])
+	
+    for i in range (0, nSlices):
+        filename=resultList[i]
+        slices = [pydicom.read_file(filename, force=True)]
+        image = DICOMtoNumpy(slices)
+	
+    
+        imageBone, binaryBone = boneSegmentation(image, [300, 3000])
+        imageBone = np.uint8(binaryBone)
+        imageBlood, binaryBlood = boneSegmentation(image, [1, 250])
+        imageBlood = np.uint8(binaryBlood)
+
+        if i==0:
+            ind=0
+            newOrder=ind
+            costMap[:,:,newOrder]=np.squeeze(image)
+            boneMap[:,:,newOrder]=np.squeeze(imageBone)
+            bloodMap[:,:,newOrder]=np.squeeze(imageBlood)
+
+        if i >>1:
+            ind=i-1
+            newOrder=int(ind)
+            costMap[:,:,newOrder]=np.squeeze(image)
+            boneMap[:,:,newOrder]=np.squeeze(imageBone)
+            bloodMap[:,:,newOrder]=np.squeeze(imageBlood)
+			
+        if i==nSlices:
+            ind=i-1
+            newOrder=int(ind)
+            costMap[:,:,newOrder]=np.squeeze(image)
+            boneMap[:,:,newOrder]=np.squeeze(imageBone)
+            bloodMap[:,:,newOrder]=np.squeeze(imageBlood)
+
+
+
+	return(costMap,boneMap,bloodMap)
+
+
+
 
 
 
@@ -761,17 +857,25 @@ if target2==0:
     target2=1
 targets=np.array([target0,target1,target2])
 
-lbnd=417
-ubnd=622
+lbnd=0
+ubnd=284
+results=[]
 
-file_name = 'I0000'
-range1=range(lbnd,ubnd)
-filename=file_name+str(range1[0])+'.dcm'
+for f in os.listdir('.'):
+	if f.endswith('.dcm'):
+		results.append(f)
 
-rawDicomMap=rawDicomMiner(file_name,filename,range1)
+
+
+#file_name = 'image'
+#range1=range(lbnd,ubnd)
+#filename=file_name+str(range1[0])+'.dcm'
+#filename=file_name+str(range1[0])
+#rawDicomMap=rawDicomMiner(file_name,filename,range1)
+rawDicomMap=rawDicomLister(results)
 np2Mat(rawDicomMap,'rawdicom')
-
-dicomMap,boneMap,bloodMap=dicomMiner(file_name,filename,range1)
+dicomMap,boneMap,bloodMap=superDicomMiner(results)
+#dicomMap,boneMap,bloodMap=dicomMiner(file_name,filename,range1)
 np2Mat(dicomMap,'dicom')
 np2Mat(boneMap,'bone')
 np2Mat(bloodMap,'blood')
