@@ -252,11 +252,4 @@ fileEnd=strcat(fileNo,ext);
 bloodName = strcat(name1,fileEnd);
 dicomwrite(X1,bloodName)
 
-X2=squeeze(dBones(:,:,nu));    
-
-
-boneName = strcat(name2,fileEnd);
-dicomwrite(X1,boneName)
-
-
 end
