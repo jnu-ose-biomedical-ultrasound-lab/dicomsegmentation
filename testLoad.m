@@ -230,7 +230,8 @@ hold off;
 
 %% separate out bone and blood
 
-
+%metadata = dicominfo('CT-MONO2-16-ankle.dcm');
+%dicomwrite(X, 'ct_file.dcm', metadata);
 load('rawdicom.mat')
 tLength=size(dicom,3);
 
